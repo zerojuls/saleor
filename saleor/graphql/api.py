@@ -65,6 +65,9 @@ from .shipping.mutations import (
     ShippingMethodCreate, ShippingMethodDelete, ShippingMethodUpdate,
     ShippingPriceCreate, ShippingPriceDelete, ShippingPriceUpdate)
 from .utils import get_node
+from .checkout.types import CheckoutLine, Checkout
+from .checkout.mutations import CheckoutLineCreate, CheckoutCreate
+from .checkout.resolvers import resolve_checkouts
 
 
 class Query(graphene.ObjectType):
@@ -88,6 +91,14 @@ class Query(graphene.ObjectType):
         Collection, query=graphene.String(
             description=DESCRIPTIONS['collection']),
         description='List of the shop\'s collections.')
+    checkouts = DjangoFilterConnectionField(
+        Checkout, description='List of checkouts',
+        filterset_class=DistinctFilterSet)
+    checkout_lines = DjangoFilterConnectionField(
+        CheckoutLine, description='List of checkout lines',
+        filterset_class=DistinctFilterSet)
+    checkout_line = graphene.Field(CheckoutLine, id=graphene.Argument(graphene.ID))
+
     menu = graphene.Field(
         Menu, id=graphene.Argument(graphene.ID),
         description='Lookup a menu by ID.')
@@ -171,6 +182,12 @@ class Query(graphene.ObjectType):
 
     def resolve_categories(self, info, level=None, query=None, **kwargs):
         return resolve_categories(info, level=level, query=query)
+
+    def resolve_cart_line(self, info, id):
+        return get_node(info, id, only_type=CheckoutLine)
+
+    def resolve_checkouts(self, info, query=None, **kwargs):
+        resolve_checkouts(info, query)
 
     def resolve_collection(self, info, id):
         return get_node(info, id, only_type=Collection)
@@ -284,6 +301,9 @@ class Mutations(graphene.ObjectType):
     address_update = AddressUpdate.Field()
     address_delete = AddressDelete.Field()
 
+    checkout_create = CheckoutCreate.Field()
+    checkout_line_create = CheckoutLineCreate.Field()
+
     collection_create = CollectionCreate.Field()
     collection_update = CollectionUpdate.Field()
     collection_delete = CollectionDelete.Field()
@@ -358,6 +378,5 @@ class Mutations(graphene.ObjectType):
 
     variant_image_assign = VariantImageAssign.Field()
     variant_image_unassign = VariantImageUnassign.Field()
-
 
 schema = graphene.Schema(Query, Mutations)
