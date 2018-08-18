@@ -7,9 +7,9 @@ from ....product import models
 from ....product.utils.attributes import get_name_from_attributes
 from ...core.mutations import BaseMutation, ModelDeleteMutation, ModelMutation
 from ...core.types.common import Decimal, Error, SeoInput
-from ...shipping.types import WeightScalar
 from ...core.utils import clean_seo_fields
 from ...file_upload.types import Upload
+from ...shipping.types import WeightScalar
 from ...utils import get_attributes_dict_from_list, get_node, get_nodes
 from ..types import Collection, Product, ProductImage, ProductVariant
 
